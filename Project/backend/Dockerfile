@@ -7,7 +7,7 @@ RUN npm ci
 
 # Copy backend source and prisma
 COPY prisma ./prisma
-COPY tsconfig.build.json ./
+COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 COPY .env* ./
 
