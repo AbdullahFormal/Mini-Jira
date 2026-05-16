@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: '/api' // Proxied via proxy.conf.json in local dev
+  apiUrl: 'https://abdullahformal-mini-jira.hf.space'
 };
