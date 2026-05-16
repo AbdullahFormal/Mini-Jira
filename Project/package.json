@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "install-all": "npm --prefix backend ci && npm --prefix backend/frontend ci",
-    "start:dev": "concurrently \"npm --prefix backend run start:dev\" \"npm --prefix backend/frontend run start\" --kill-others-on-fail",
-    "build-all": "npm --prefix backend/frontend run build && npm --prefix backend run build",
+    "install-all": "npm --prefix backend ci && npm --prefix frontend ci",
+    "start:dev": "concurrently \"npm --prefix backend run start:dev\" \"npm --prefix frontend run start\" --kill-others-on-fail",
+    "build-all": "npm --prefix frontend run build && npm --prefix backend run build",
     "start": "npm run build-all && node backend/dist/main.js"
   },
   "devDependencies": {

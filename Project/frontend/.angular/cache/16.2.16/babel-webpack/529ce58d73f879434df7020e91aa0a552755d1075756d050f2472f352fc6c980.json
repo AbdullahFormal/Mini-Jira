@@ -1,0 +1,1 @@
+{"ast":null,"code":"export const environment = {\n  production: false,\n  apiUrl: '/api' // Proxied via proxy.conf.json in local dev\n};","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}

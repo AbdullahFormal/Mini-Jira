@@ -91,7 +91,7 @@ Before deploying the frontend to Vercel, tell Angular where to find your new bac
 3. Import your `Mini-Jira` GitHub repository.
 4. **Configure Project:**
    - **Framework Preset:** Angular
-   - **Root Directory:** Click Edit and select `Project/backend/frontend`.
+   - **Root Directory:** Click Edit and select `Project/frontend`.
 5. Click **Deploy**.
 
 Vercel will build the Angular application and assign it a public URL (e.g., `https://mini-jira-front.vercel.app`).
