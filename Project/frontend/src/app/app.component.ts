@@ -79,10 +79,17 @@ export class AppComponent {
   async register() {
     this.clearError();
     try {
-      await firstValueFrom(this.api.register({ email: this.email, password: this.password, name: this.name, role: this.roleSelect }));
-      this.error = 'Registered. Now log in with the new account.';
+      if (!this.name.trim()) {
+        this.error = 'Please enter a name to register.';
+        return;
+      }
+      const generatedEmail = this.name.trim().toLowerCase().replace(/\s+/g, '') + '@example.com';
+      const defaultPassword = 'password';
+
+      await firstValueFrom(this.api.register({ email: generatedEmail, password: defaultPassword, name: this.name, role: this.roleSelect }));
+      this.error = `Registered! You can now log in with Email: ${generatedEmail} and Password: ${defaultPassword}`;
     } catch {
-      this.error = 'Register failed. Use a valid email and a password with at least 6 characters.';
+      this.error = 'Register failed. This name might already be taken.';
     }
   }
 

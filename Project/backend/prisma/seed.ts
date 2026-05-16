@@ -10,23 +10,16 @@ async function main() {
   // Hash a shared password for both test users
   const hashedPassword = await bcrypt.hash('password', 10);
 
-  // Create test users — skipDuplicates so re-running seed is safe
-  await prisma.user.createMany({
-    data: [
-      {
-        email: 'manager@example.com',
-        name: 'Alice Manager',
-        password: hashedPassword,
-        role: 'MANAGER',
-      },
-      {
-        email: 'dev@example.com',
-        name: 'Bob Developer',
-        password: hashedPassword,
-        role: 'DEVELOPER',
-      },
-    ],
-    skipDuplicates: true,
+  await prisma.user.upsert({
+    where: { email: 'manager@example.com' },
+    update: { name: 'manager', password: hashedPassword, role: 'MANAGER' },
+    create: { email: 'manager@example.com', name: 'manager', password: hashedPassword, role: 'MANAGER' },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'dev@example.com' },
+    update: { name: 'dev', password: hashedPassword, role: 'DEVELOPER' },
+    create: { email: 'dev@example.com', name: 'dev', password: hashedPassword, role: 'DEVELOPER' },
   });
 
   console.log('✅ Seed complete');
