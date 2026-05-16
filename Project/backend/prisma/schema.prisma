@@ -1,0 +1,61 @@
+// prisma/schema.prisma — defines the database tables and relationships
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// User roles: MANAGER can create projects, DEVELOPER works on tasks
+enum Role {
+  MANAGER
+  DEVELOPER
+}
+
+// Task progress states
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(DEVELOPER)
+  createdAt DateTime @default(now())
+
+  // A user can manage many projects and be assigned many tasks
+  projects Project[]
+  tasks    Task[]
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  managerId   String
+  createdAt   DateTime @default(now())
+
+  manager User   @relation(fields: [managerId], references: [id])
+  tasks   Task[]
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  projectId   String
+  assigneeId  String?
+  createdAt   DateTime   @default(now())
+
+  // Deleting a project also deletes its tasks (Cascade)
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee User?   @relation(fields: [assigneeId], references: [id])
+}

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+/.idea
+.vscode
+
+# Angular frontend caches
+backend/frontend/.angular/
+backend/frontend/.cache/
+
+# Frontend lockfile (optional)
+backend/frontend/package-lock.json

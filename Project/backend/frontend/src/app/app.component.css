@@ -1,0 +1,19 @@
+.app-root{max-width:760px;margin:24px auto;padding:16px;font-family:Arial,Helvetica,sans-serif;transition:all .2s ease}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:8px 12px;border-radius:8px}
+main{display:block;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+input,select{display:block;width:100%;max-width:360px;margin:8px 0;padding:8px;border:1px solid #d1d5db;border-radius:6px}
+button{padding:8px 10px;margin:4px 6px 4px 0;border:none;border-radius:6px;background:#2563eb;color:#fff}
+.manager-theme{background:linear-gradient(180deg,#eef6ff 0%,#f8fbff 100%)}
+.manager-theme header{background:#dbeafe;color:#1e3a8a}
+.manager-theme main{border-color:#bfdbfe}
+.developer-theme{background:linear-gradient(180deg,#ecfdf5 0%,#f8fffb 100%)}
+.developer-theme header{background:#d1fae5;color:#065f46}
+.developer-theme main{border-color:#a7f3d0}
+.project-list{margin:8px 0}
+.project-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef2f7}
+.tasks{margin-top:12px}
+.status-message{margin:0 0 12px 0;padding:8px 10px;background:#fef3c7;border-radius:6px}
+.muted{font-size:12px;color:#6b7280}
+.help-card{background:#f9fafb;border:1px solid #e6eef6;padding:12px;border-radius:8px;margin:12px 0}
+.danger-btn{background:#dc2626}
+.danger-btn:hover{background:#b91c1c}
