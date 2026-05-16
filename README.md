@@ -117,8 +117,4 @@ See controllers in [Project/backend/src](Project/backend/src) for exact DTOs and
 - Make changes on a branch, open a PR, and include a brief description and any relevant run steps.
 
 ## License
-This demo contains no formal license. Add a license file if you plan to publish or share.
-
----
-
-If you want a different tone (portfolio, instructor handout, or short one-page cheat sheet), tell me which and I'll produce a tailored README.
+This demo is published under MIT License
