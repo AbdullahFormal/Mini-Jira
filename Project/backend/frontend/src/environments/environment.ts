@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBase: '/api'
+  apiUrl: '/api' // Proxied via proxy.conf.json in local dev
 };

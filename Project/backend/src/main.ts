@@ -15,19 +15,7 @@ async function bootstrap() {
   // Create the app as a NestExpressApplication so we can serve static files without extra deps
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Serve the frontend static files from /frontend/frontend-angular
-  app.useStaticAssets(join(__dirname, '..', 'frontend', 'frontend-angular'));
-
-  // Fallback to index.html for client-side routing (serve index for GET requests without a file extension)
-  // Do not intercept API routes (auth, projects, tasks, or /api) so backend endpoints remain reachable.
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    const apiPrefixes = ['/api', '/auth', '/projects', '/tasks'];
-    const isApi = apiPrefixes.some((p) => req.path.startsWith(p));
-    if (req.method === 'GET' && !req.path.includes('.') && !isApi) {
-      return res.sendFile(join(__dirname, '..', 'frontend', 'frontend-angular', 'index.html'));
-    }
-    next();
-  });
+  // The frontend is now decoupled. We only serve the API.
 
   // Automatically validate incoming request bodies using class-validator rules
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -35,7 +23,7 @@ async function bootstrap() {
   // Allow requests from any origin (needed for local frontend development)
   app.enableCors();
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 7860;
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
 }

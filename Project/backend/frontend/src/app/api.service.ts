@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { environment } from '../environments/environment';
+
 @Injectable()
 export class ApiService {
-  private base = '/api';
+  private base = environment.apiUrl;
   constructor(private http: HttpClient) {}
 
   login(payload: { email: string; password: string }): Observable<any> {
