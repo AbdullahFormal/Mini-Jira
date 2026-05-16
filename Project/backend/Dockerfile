@@ -32,5 +32,5 @@ COPY --from=builder /app/prisma ./prisma
 # Copy built frontend dist to be served by Nest static assets
 COPY --from=builder /app/frontend/dist ./frontend
 
-EXPOSE 3000
-CMD ["node", "dist/main.js"]
+EXPOSE 8000
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]

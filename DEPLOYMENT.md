@@ -1,16 +1,17 @@
-# Deployment Guide — MiniJira on Render
+# Deployment Guide — MiniJira on Koyeb (Free)
 
-Deploy MiniJira to Render using a single Docker container that includes both the backend API and the built Angular frontend, plus a managed PostgreSQL database.
+Deploy MiniJira to Koyeb using a single Docker container that includes both the backend API and the built Angular frontend. We will connect it to your existing Supabase PostgreSQL database.
 
-## Why Render?
-- ✅ Free tier with managed PostgreSQL
-- ✅ Simple Docker deployment (no Docker Hub required)
+## Why Koyeb?
+- ✅ Generous "Eco" free tier (512MB RAM)
+- ✅ **No credit card required** for the free tier
+- ✅ Simple Docker deployment (builds directly from your repo)
 - ✅ GitHub integration (auto-deploy on push)
-- ✅ Web UI for environment variables and secrets
 
 ## Prerequisites
 1. **GitHub account** — push this repo to your GitHub.
-2. **Render account** — free account at [render.com](https://render.com).
+2. **Koyeb account** — free account at [koyeb.com](https://www.koyeb.com/). Sign up with GitHub.
+3. **Supabase Database** — you should already have a Supabase PostgreSQL database and its `DATABASE_URL`.
 
 ---
 
@@ -31,161 +32,82 @@ Replace `YOUR_USERNAME` with your GitHub username. Your code is now on GitHub.
 
 ---
 
-## Step 2: Create Managed PostgreSQL on Render
+## Step 2: Create Web Service on Koyeb
 
-1. Go to [render.com/dashboard](https://render.com/dashboard).
-2. Click **New +** → **PostgreSQL**.
-3. Fill in:
-   - **Name:** `mini-jira-db` (or similar)
-   - **Database:** `minijiiradb` (or any name)
-   - **User:** `postgres` (default is fine)
-   - Leave other fields as defaults.
-4. Click **Create Database** and wait (2–3 minutes).
-5. Once created, copy the **Internal Database URL** (starts with `postgresql://...`).
-   - Store this safely — you'll use it in Step 3.
-
----
-
-## Step 3: Create Web Service on Render
-
-1. Back in the dashboard, click **New +** → **Web Service**.
-2. **Connect your GitHub repo:**
-   - Click **GitHub** if prompted, authorize Render to access your GitHub.
+1. Go to your [Koyeb Dashboard](https://app.koyeb.com/).
+2. Click **Create Service** (or **Deploy**).
+3. **Connect your GitHub repo:**
+   - Choose **GitHub** as the deployment method.
+   - Authorize Koyeb to access your GitHub repositories.
    - Select your `Mini-Jira` repo.
-   - Leave the branch as `main`.
-3. **Configure the service:**
-   - **Name:** `mini-jira-backend` (or similar)
-   - **Region:** Pick the closest to your users (e.g., `N. Virginia` for US).
-   - **Runtime:** Select **Docker**.
-   - **Build Command:** Leave empty (Render auto-detects `Dockerfile`).
-   - **Dockerfile path:** Enter `Project/backend/Dockerfile`.
-   - **Start Command:** Leave empty (uses `CMD` from Dockerfile).
+   - Branch: `main` (or whichever branch you pushed to).
+4. **Configure the build:**
+   - **Builder:** Select **Dockerfile**.
+   - **Dockerfile location:** Enter `/backend/Dockerfile`. (Make sure this matches your repo structure).
+   - **Privileged:** Off.
+5. **Environment Variables:**
+   - Add the following variables:
+     - `DATABASE_URL` = `postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true` (Use your actual Supabase URL. Port 6543 with `?pgbouncer=true` is recommended for Koyeb, or port 5432).
+     - `JWT_SECRET` = `your_secure_random_string_here` (Use a strong random string).
+     - `PORT` = `8000` (Koyeb's default port, which we configured in the Dockerfile).
+6. **Instance & Region:**
+   - Choose the **Eco (Free)** instance type.
+   - Select a region closest to you.
+7. **Expose your service:**
+   - **Port:** `8000`
+   - **Protocol:** `HTTP`
+   - **Path:** `/`
+8. **Name your service:** Give it a name like `mini-jira`.
+9. Click **Deploy**.
 
-4. **Add Environment Variables:**
-   - Scroll down to **Environment** section.
-   - Click **Add Environment Variable** and add:
-     ```
-     DATABASE_URL = postgresql://postgres:PASSWORD@HOST:5432/minijiiradb
-     ```
-     (Replace `PASSWORD` and `HOST` with values from your PostgreSQL service URL.)
-   - Add another:
-     ```
-     JWT_SECRET = your_secure_random_string_here
-     ```
-     (Use a strong random string, or just `dev-secret` for testing.)
-   - Optionally:
-     ```
-     PORT = 3000
-     ```
-
-5. Click **Create Web Service**. Render will:
-   - Clone your repo.
-   - Build the Docker image (compile Angular + TypeScript backend).
-   - Deploy the container.
-   - Assign a public URL (e.g., `https://mini-jira-backend.render.com`).
-
-   Build takes ~3–5 minutes. Watch the **Logs** tab.
+Koyeb will now clone your repo, build the Docker image (which includes compiling Angular and NestJS), and start the container. The build process typically takes 3-5 minutes.
 
 ---
 
-## Step 4: Run Database Migrations (one-time setup)
+## Step 3: Database Migrations & Seeding
 
-Once the service is deployed and running:
+The provided `Dockerfile` is configured to run `npx prisma migrate deploy` automatically before starting the Node.js server. This means **your Supabase database will be automatically migrated** as soon as the Koyeb container starts.
 
-1. In the Render dashboard, click your Web Service.
-2. Click the **Shell** tab at the top.
-3. In the shell, run:
-   ```bash
-   npx prisma migrate deploy --schema=Project/backend/prisma/schema.prisma
-   npx prisma generate --schema=Project/backend/prisma/schema.prisma
-   npm run seed --prefix=Project/backend
-   ```
-
-   This:
-   - Applies all pending migrations to your Postgres DB.
-   - Generates the Prisma client.
-   - Seeds the database with demo users (optional; skip `npm run seed` if you don't want sample data).
+*(Note: If you want to seed the database with sample data, you can temporarily connect your local terminal to the Supabase database and run `npm run seed`, or run a one-off command in Koyeb).*
 
 ---
 
-## Step 5: Test the Deployment
+## Step 4: Test the Deployment
 
-1. Open the public URL assigned by Render (shown in the service dashboard, e.g., `https://mini-jira-backend.render.com`).
-2. You should see the MiniJira Angular app.
-3. Try registering a new user or logging in with demo credentials (if you ran seed):
-   - **Email:** `manager@example.com` **Password:** `password123`
-   - **Email:** `dev@example.com` **Password:** `password456`
+1. Open the public URL assigned by Koyeb (e.g., `https://mini-jira-something.koyeb.app`).
+2. You should see the MiniJira Angular application load.
+3. Try registering a new user or logging in to confirm database connectivity.
 
 ---
 
 ## Troubleshooting
 
 ### Build fails
-- Check the **Logs** in the Render dashboard.
-- Ensure `Dockerfile` path is correct: `Project/backend/Dockerfile`.
-- Verify `DATABASE_URL` and `JWT_SECRET` are set.
+- Check the **Build Logs** in the Koyeb dashboard.
+- Ensure the Dockerfile path is correct (`/backend/Dockerfile` or `Project/backend/Dockerfile` depending on your repo root).
 
 ### App runs but frontend doesn't load
-- Ensure the Angular build completed in the Docker image.
-- Check that `/api` routes work: open the browser DevTools console and verify API calls are reaching the backend.
+- Check the **Runtime Logs** in Koyeb.
+- Ensure that the static asset path in `src/main.ts` correctly points to the built Angular folder (`frontend-angular`). This should already be fixed in the code.
 
 ### Database connection error
-- Verify `DATABASE_URL` is correctly formatted and matches your PostgreSQL service details.
-- Check that the PostgreSQL service is **running** (not paused) in the Render dashboard.
-
-### Forgot to seed?
-- Run migrations + seed again from the Shell:
-  ```bash
-  npx prisma migrate deploy --schema=Project/backend/prisma/schema.prisma
-  npm run seed --prefix=Project/backend
-  ```
+- Verify `DATABASE_URL` is correctly formatted in your Koyeb Environment Variables.
+- Supabase enforces SSL, so ensure `?sslmode=require` (or `?pgbouncer=true` for pooled connections) is in the URL.
+- Make sure your Supabase project is active and not paused.
 
 ---
 
 ## Optional: Auto-redeploy on Git push
 
-Render automatically redeploys when you push to `main` (or your connected branch). To test:
+Koyeb automatically redeploys when you push to your connected branch. To test:
 
 ```bash
 git commit --allow-empty -m "Trigger redeploy"
 git push
 ```
 
-Watch the **Deployments** tab in your Render service to see the new build start.
+Watch the Koyeb dashboard to see the new deployment start.
 
 ---
-
-## Environment Variables Reference
-
-| Variable | Required | Example | Notes |
-| --- | --- | --- | --- |
-| `DATABASE_URL` | ✅ Yes | `postgresql://...` | Copy from your Render PostgreSQL service. |
-| `JWT_SECRET` | ✅ Yes | `my-secret-key-123` | Keep this secret. Use a strong random string. |
-| `PORT` | ❌ Optional | `3000` | Defaults to 3000 if not set. |
-
----
-
-## Next Steps
-
-- **Monitor logs** — Check the **Logs** tab regularly for errors.
-- **Scale up** — If you outgrow the free tier, upgrade your plan.
-- **Custom domain** — Add a custom domain in **Settings** → **Custom Domain**.
-- **Local development** — See [Guide.md](./Guide.md) for running locally.
-
----
-
-## Deployment Diagram
-
-```
-GitHub Repo (Mini-Jira)
-    ↓
-Render (connected)
-    ├─ Web Service (Docker: backend + built frontend)
-    │  ├─ Listens on port 3000
-    │  └─ Serves /api & static frontend
-    │
-    └─ PostgreSQL (managed)
-       └─ DATABASE_URL provided to Web Service
-```
 
 Happy deploying! 🚀

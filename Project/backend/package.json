@@ -10,6 +10,7 @@
     "build": "tsc -p tsconfig.build.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
+    "start:prod": "npx prisma migrate deploy && node dist/main.js",
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {

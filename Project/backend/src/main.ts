@@ -15,8 +15,8 @@ async function bootstrap() {
   // Create the app as a NestExpressApplication so we can serve static files without extra deps
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Serve the frontend static files from /frontend
-  app.useStaticAssets(join(__dirname, '..', 'frontend'));
+  // Serve the frontend static files from /frontend/frontend-angular
+  app.useStaticAssets(join(__dirname, '..', 'frontend', 'frontend-angular'));
 
   // Fallback to index.html for client-side routing (serve index for GET requests without a file extension)
   // Do not intercept API routes (auth, projects, tasks, or /api) so backend endpoints remain reachable.
@@ -24,7 +24,7 @@ async function bootstrap() {
     const apiPrefixes = ['/api', '/auth', '/projects', '/tasks'];
     const isApi = apiPrefixes.some((p) => req.path.startsWith(p));
     if (req.method === 'GET' && !req.path.includes('.') && !isApi) {
-      return res.sendFile(join(__dirname, '..', 'frontend', 'index.html'));
+      return res.sendFile(join(__dirname, '..', 'frontend', 'frontend-angular', 'index.html'));
     }
     next();
   });
