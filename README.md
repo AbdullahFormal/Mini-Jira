@@ -1,4 +1,4 @@
-# MiniJira — Professional README
+# MiniJira — README
 
 This repository contains MiniJira, a compact task-management demo application implementing a full-stack TypeScript workflow: a NestJS backend with Prisma ORM and an Angular frontend. The project is intentionally small and readable while following real-world patterns (JWT auth, database migrations, environment configuration), making it suitable for demonstrations, teaching, and light prototyping.
 
