@@ -23,6 +23,11 @@ build/
 # OS
 Thumbs.db
 
+# Docs
+backend_guide.md
+frontend_guide.md
+system_interaction_guide.md
+
 # Logs
 logs/
 *.log
