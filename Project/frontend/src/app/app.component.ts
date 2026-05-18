@@ -16,9 +16,15 @@ export class AppComponent {
   currentProject: any = null;
   tasks: any[] = [];
   error = '';
+  users: any[] = [];
+  taskAssigneeId = '';
+  activeProjectStats: any = null;
+  activeProjectActivity: any[] = [];
 
   email = '';
   password = '';
+  registerEmail = '';
+  registerPassword = '';
   name = '';
   roleSelect = 'DEVELOPER';
 
@@ -52,6 +58,7 @@ export class AppComponent {
       this.role = this.decodeRole(t);
       this.userName = this.decodeName(t);
       void this.loadProjects();
+      void this.loadUsers();
       return;
     }
 
@@ -61,6 +68,9 @@ export class AppComponent {
     this.projects = [];
     this.currentProject = null;
     this.tasks = [];
+    this.users = [];
+    this.activeProjectStats = null;
+    this.activeProjectActivity = [];
   }
 
   async login() {
@@ -79,27 +89,43 @@ export class AppComponent {
   async register() {
     this.clearError();
     try {
-      if (!this.name.trim()) {
-        this.error = 'Please enter a name to register.';
+      if (!this.name.trim() || !this.registerEmail.trim() || !this.registerPassword) {
+        this.error = 'Please enter name, email, and password to register.';
         return;
       }
-      const generatedEmail = this.name.trim().toLowerCase().replace(/\s+/g, '') + '@example.com';
-      const defaultPassword = 'password';
 
-      await firstValueFrom(this.api.register({ email: generatedEmail, password: defaultPassword, name: this.name, role: this.roleSelect }));
-      this.error = `Registered! You can now log in with Email: ${generatedEmail} and Password: ${defaultPassword}`;
+      await firstValueFrom(this.api.register({ email: this.registerEmail, password: this.registerPassword, name: this.name, role: this.roleSelect }));
+      this.error = `Registered successfully! You can now log in.`;
+      
+      this.registerEmail = '';
+      this.registerPassword = '';
+      this.name = '';
     } catch {
-      this.error = 'Register failed. This name might already be taken.';
+      this.error = 'Register failed. This email or name might already be taken.';
     }
   }
 
   async loadProjects() {
     try {
       this.projects = await firstValueFrom(this.api.getProjects());
+      if (this.currentProject) {
+        const updated = this.projects.find(p => p.id === this.currentProject.id);
+        if (updated) {
+          this.currentProject = updated;
+        }
+      }
       this.clearError();
     } catch {
       this.projects = [];
       this.error = 'Could not load projects. Make sure the backend is running and you are logged in.';
+    }
+  }
+
+  async loadUsers() {
+    try {
+      this.users = await firstValueFrom(this.api.getUsers());
+    } catch {
+      this.users = [];
     }
   }
 
@@ -113,6 +139,24 @@ export class AppComponent {
   async openProject(project: any) {
     this.currentProject = project;
     await this.loadTasks(project.id);
+    await this.loadProjectStats(project.id);
+    await this.loadProjectActivity(project.id);
+  }
+
+  async loadProjectStats(projectId: string) {
+    try {
+      this.activeProjectStats = await firstValueFrom(this.api.getProjectStats(projectId));
+    } catch {
+      this.activeProjectStats = null;
+    }
+  }
+
+  async loadProjectActivity(projectId: string) {
+    try {
+      this.activeProjectActivity = await firstValueFrom(this.api.getProjectActivity(projectId));
+    } catch {
+      this.activeProjectActivity = [];
+    }
   }
 
   async loadTasks(projectId: string) {
@@ -130,10 +174,23 @@ export class AppComponent {
       return;
     }
 
-    await firstValueFrom(this.api.createTask({ title: this.taskTitle, description: this.taskDesc, projectId: this.currentProject.id }));
-    this.taskTitle = '';
-    this.taskDesc = '';
-    await this.loadTasks(this.currentProject.id);
+    try {
+      await firstValueFrom(this.api.createTask({
+        title: this.taskTitle,
+        description: this.taskDesc,
+        projectId: this.currentProject.id,
+        assigneeId: this.taskAssigneeId ? this.taskAssigneeId : undefined
+      }));
+      this.taskTitle = '';
+      this.taskDesc = '';
+      this.taskAssigneeId = '';
+      await this.loadTasks(this.currentProject.id);
+      await this.loadProjects();
+      await this.loadProjectStats(this.currentProject.id);
+      await this.loadProjectActivity(this.currentProject.id);
+    } catch {
+      // standard silent fail matching original design
+    }
   }
 
   async updateTask(task: any) {
@@ -148,6 +205,9 @@ export class AppComponent {
     const next = task.status === 'TODO' ? 'IN_PROGRESS' : 'DONE';
     await firstValueFrom(this.api.updateTask(task.id, { status: next }));
     await this.loadTasks(this.currentProject.id);
+    await this.loadProjects();
+    await this.loadProjectStats(this.currentProject.id);
+    await this.loadProjectActivity(this.currentProject.id);
   }
 
   async deleteTask(task: any) {
@@ -157,6 +217,9 @@ export class AppComponent {
 
     await firstValueFrom(this.api.deleteTask(task.id));
     await this.loadTasks(this.currentProject.id);
+    await this.loadProjects();
+    await this.loadProjectStats(this.currentProject.id);
+    await this.loadProjectActivity(this.currentProject.id);
   }
 
   async deleteProject(project: any) {
@@ -172,6 +235,23 @@ export class AppComponent {
 
   logout() {
     this.applyToken('');
+  }
+
+  getDoneTasksCount(project: any): number {
+    if (!project || !project.tasks) return 0;
+    return project.tasks.filter((t: any) => t.status === 'DONE').length;
+  }
+
+  getTotalTasksCount(project: any): number {
+    if (!project || !project.tasks) return 0;
+    return project.tasks.length;
+  }
+
+  getProgressPercentage(project: any): number {
+    if (!project || !project.tasks || project.tasks.length === 0) return 0;
+    const done = this.getDoneTasksCount(project);
+    const total = this.getTotalTasksCount(project);
+    return Math.round((done / total) * 100);
   }
 
   private decodeRole(token: string) {

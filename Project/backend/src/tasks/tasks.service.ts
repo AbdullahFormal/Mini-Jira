@@ -1,4 +1,4 @@
-// src/tasks/tasks.service.ts — database operations for tasks
+// src/tasks/tasks.service.ts - Task service
 
 import {
   Injectable,
@@ -7,28 +7,25 @@ import {
 import { PrismaService } from '../prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { logActivity } from '../activity-log';
 
 @Injectable()
 export class TasksService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Creates a new task inside a project.
-   * Verifies the project exists first; throws 404 if not.
-   */
+  // Create task
   async create(dto: CreateTaskDto) {
     const project = await this.prisma.project.findUnique({
       where: { id: dto.projectId },
     });
     if (!project) throw new NotFoundException('Project not found');
 
-    return this.prisma.task.create({ data: dto });
+    const task = await this.prisma.task.create({ data: dto });
+    logActivity(task.projectId, `Task "${task.title}" was added.`);
+    return task;
   }
 
-  /**
-   * Returns all tasks for a given project.
-   * Includes the assignee's name and email for display.
-   */
+  // Find tasks by project ID
   async findByProject(projectId: string) {
     return this.prisma.task.findMany({
       where: { projectId },
@@ -38,10 +35,7 @@ export class TasksService {
     });
   }
 
-  /**
-   * Returns a single task by id.
-   * Throws 404 if not found.
-   */
+  // Find task by ID
   async findOne(id: string) {
     const task = await this.prisma.task.findUnique({
       where: { id },
@@ -53,20 +47,25 @@ export class TasksService {
     return task;
   }
 
-  /**
-   * Updates allowed fields (title, description, status, assigneeId).
-   * ValidationPipe + UpdateTaskDto handles bad input before it gets here.
-   */
+  // Update task
   async update(id: string, dto: UpdateTaskDto) {
-    await this.findOne(id); // throws 404 if task doesn't exist
-    return this.prisma.task.update({ where: { id }, data: dto });
+    const task = await this.findOne(id);
+    const updated = await this.prisma.task.update({ where: { id }, data: dto });
+
+    if (dto.status && dto.status !== task.status) {
+      logActivity(task.projectId, `Task "${task.title}" status changed to ${dto.status}.`);
+    } else {
+      logActivity(task.projectId, `Task "${task.title}" was updated.`);
+    }
+
+    return updated;
   }
 
-  /**
-   * Deletes a task by id.
-   */
+  // Delete task
   async remove(id: string) {
-    await this.findOne(id); // throws 404 if task doesn't exist
-    return this.prisma.task.delete({ where: { id } });
+    const task = await this.findOne(id);
+    const deleted = await this.prisma.task.delete({ where: { id } });
+    logActivity(task.projectId, `Task "${task.title}" was deleted.`);
+    return deleted;
   }
 }

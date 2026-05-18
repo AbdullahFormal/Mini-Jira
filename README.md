@@ -67,7 +67,7 @@ npm run seed
 Schema and data model: see [Project/backend/prisma/schema.prisma](Project/backend/prisma/schema.prisma).
 
 ## Authentication
-- **Registration**: `POST /auth/register` — Auto-generates an email based on the provided name (e.g., `name@example.com`) and sets the password to `password` to simplify demo usage.
+- **Registration**: `POST /auth/register` — Allows users to sign up using their own Full Name, Email, and Password, alongside selecting either a `MANAGER` or `DEVELOPER` role.
 - **Login**: `POST /auth/login` — validates credentials and returns a signed JWT (and `name`, `email`, `role` in the response).
 - Protected routes use a `JwtAuthGuard` to validate tokens.
 
@@ -76,15 +76,18 @@ Frontend stores the JWT in `localStorage` as `mj_token` and includes it as `Auth
 ## API (overview)
 - `POST /auth/register` — register new account
 - `POST /auth/login` — login
+- `GET /auth/users` — list registered team members
 - `GET /projects` — list projects for the user
 - `POST /projects` — create project (manager only)
+- `GET /projects/:id/stats` — calculate project task metrics
+- `GET /projects/:id/activity` — fetch project audit log history
 - `DELETE /projects/:id` — delete project
 - `GET /tasks?projectId=...` — list tasks
 - `POST /tasks` — create a task
 - `PATCH /tasks/:id` — update task (status/title/desc)
 - `DELETE /tasks/:id` — delete task
 
-See controllers in [Project/backend/src](Project/backend/src) for exact DTOs and validation rules.
+See controllers in [Project/backend/src](Project/backend/src) for DTOs and validation rules.
 
 ## Frontend notes
 - Entry: [Project/frontend/src/app/app.component.ts](Project/frontend/src/app/app.component.ts)

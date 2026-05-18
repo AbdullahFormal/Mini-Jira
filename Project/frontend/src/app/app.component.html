@@ -1,85 +1,273 @@
 <div [ngClass]="{'manager-theme': role==='MANAGER','developer-theme': role==='DEVELOPER'}" class="app-root">
-  <header>
-    <h1>MiniJira</h1>
-    <div *ngIf="role">{{role}}<span *ngIf="userName">: {{userName}}</span></div>
-  </header>
-  <main>
-  <p *ngIf="error" class="status-message">{{error}} <button (click)="clearError()">Dismiss</button></p>
-
-  <section *ngIf="!token">
-    <h2>Login</h2>
-    <button style="float:right" (click)="openHelp()">Help</button>
-    <div *ngIf="showHelp" class="help-card">
-      <h3>Help & Demo</h3>
-      <p>This mini task manager supports:</p>
-      <ul>
-        <li>Register and Login (JWT authentication)</li>
-        <li>Create / Delete Projects (Manager only)</li>
-        <li>Create / Update / Delete Tasks inside a project</li>
-        <li>Role-based UI (Manager / Developer)</li>
-      </ul>
-      <p>Demo users (seeded):</p>
-      <ul>
-        <li><strong>Manager</strong>: manager@example.com / password</li>
-        <li><strong>Developer</strong>: dev@example.com / password</li>
-      </ul>
-      <p>How to use the demo:</p>
-      <ol>
-        <li>Login with one of the demo users above.</li>
-        <li>Managers can create projects; developers can open projects and add tasks.</li>
-        <li>Use the <em>Next</em> button on a task to advance its status (TODO → IN_PROGRESS → DONE).</li>
-      </ol>
-      <button (click)="closeHelp()">Back</button>
-    </div>
-    <input [(ngModel)]="email" placeholder="email" />
-    <input [(ngModel)]="password" placeholder="password" type="password" />
-    <button (click)="login()">Login</button>
-    <h3>Or register</h3>
-    <input [(ngModel)]="name" placeholder="name" />
-    <select [(ngModel)]="roleSelect"><option value="DEVELOPER">Developer</option><option value="MANAGER">Manager</option></select>
-    <button (click)="register()">Register</button>
-  </section>
-
-  <section *ngIf="token">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <div><strong>Signed in</strong></div>
-      <div>
-        <button (click)="logout()">Logout</button>
+  <header class="app-header">
+    <div class="header-content">
+      <div class="brand">
+        <span class="brand-logo">✓</span>
+        <h1>MiniJira</h1>
+      </div>
+      <div *ngIf="role" class="user-badge">
+        <span class="user-role">{{role}}</span>
+        <span *ngIf="userName" class="user-name">{{userName}}</span>
       </div>
     </div>
+  </header>
 
-    <div *ngIf="role==='MANAGER'" style="margin-top:12px">
-      <h2>Create Project</h2>
-      <input [(ngModel)]="projectName" placeholder="name" />
-      <input [(ngModel)]="projectDesc" placeholder="description" />
-      <button (click)="createProject()">Create</button>
-    </div>
+  <main class="app-main">
+    <p *ngIf="error" class="status-message">
+      <span class="error-text">{{error}}</span>
+      <button class="dismiss-btn" (click)="clearError()">✕</button>
+    </p>
 
-    <h2 style="margin-top:12px">Projects</h2>
-    <div class="project-list">
-      <div *ngFor="let p of projects" class="project-item"> 
-        <div><strong>{{p.name}}</strong><div class="muted">{{p.description}}</div></div>
-        <div>
-          <button (click)="openProject(p)">Open</button>
-          <button *ngIf="role==='MANAGER'" (click)="deleteProject(p)" class="danger-btn">Delete</button>
+    <!-- Guest / Auth Area -->
+    <section *ngIf="!token" class="guest-section">
+      <div class="auth-header">
+        <div class="auth-title-group">
+          <h2>Get Started with MiniJira</h2>
+          <p>Collaborate, manage projects, and track tasks efficiently.</p>
+        </div>
+        <button class="btn btn-secondary guide-toggle-btn" (click)="showHelp ? closeHelp() : openHelp()">
+          {{ showHelp ? 'Hide Guide' : '📖 View Guide' }}
+        </button>
+      </div>
+
+      <!-- Quick Guide Card -->
+      <div *ngIf="showHelp" class="guide-card">
+        <div class="guide-header">
+          <h3>📖 MiniJira Quick Start Guide</h3>
+          <button class="close-guide-btn" (click)="closeHelp()">✕</button>
+        </div>
+        <div class="guide-content">
+          <div class="guide-grid">
+            <div class="guide-column">
+              <h4>1. Authentication</h4>
+              <p>Register with your own <strong>name, email, and password</strong>, choosing a role. Or use our seeded demo users:</p>
+              <ul>
+                <li><strong>Manager</strong>: <code>manager@example.com</code> / <code>password</code></li>
+                <li><strong>Developer</strong>: <code>dev@example.com</code> / <code>password</code></li>
+              </ul>
+            </div>
+            <div class="guide-column">
+              <h4>2. Manager Role</h4>
+              <ul>
+                <li>Create and structure projects with descriptions.</li>
+                <li>Delete projects when they are complete.</li>
+                <li>Oversee work distribution and progress.</li>
+              </ul>
+            </div>
+            <div class="guide-column">
+              <h4>3. Developer Role</h4>
+              <ul>
+                <li>Open projects to see active tasks.</li>
+                <li>Create new tasks for the project.</li>
+                <li>Advance task status: <code>TODO</code> → <code>IN_PROGRESS</code> → <code>DONE</code> using the <strong>Next</strong> button.</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div *ngIf="currentProject" class="tasks">
-      <h3>Tasks for {{currentProject.name}}</h3>
-      <input [(ngModel)]="taskTitle" placeholder="title" />
-      <input [(ngModel)]="taskDesc" placeholder="desc" />
-      <button (click)="createTask()">Create Task</button>
+      <!-- Split Auth Container -->
+      <div class="auth-container">
+        <!-- Login Card -->
+        <div class="auth-card">
+          <div class="card-header">
+            <h3>Login</h3>
+            <p>Welcome back! Please enter your credentials.</p>
+          </div>
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input id="login-email" [(ngModel)]="email" placeholder="e.g., dev@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input id="login-password" [(ngModel)]="password" placeholder="••••••••" type="password" />
+          </div>
+          <button class="btn btn-primary btn-block" (click)="login()">Sign In</button>
+        </div>
 
-      <ul>
-        <li *ngFor="let t of tasks">
-          {{t.title}} — {{t.status}}
-          <button *ngIf="t.status !== 'DONE'" (click)="updateTask(t)">Next</button>
-          <button (click)="deleteTask(t)" class="danger-btn">Delete</button>
-        </li>
-      </ul>
-    </div>
-  </section>
+        <!-- Register Card -->
+        <div class="auth-card">
+          <div class="card-header">
+            <h3>Register</h3>
+            <p>Create your custom account and get started.</p>
+          </div>
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input id="reg-name" [(ngModel)]="name" placeholder="e.g., Alex Johnson" />
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input id="reg-email" [(ngModel)]="registerEmail" placeholder="e.g., alex@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input id="reg-password" [(ngModel)]="registerPassword" placeholder="Min. 6 characters" type="password" />
+          </div>
+          <div class="form-group">
+            <label for="reg-role">Role</label>
+            <select id="reg-role" [(ngModel)]="roleSelect">
+              <option value="DEVELOPER">Developer (Work on tasks)</option>
+              <option value="MANAGER">Manager (Create projects)</option>
+            </select>
+          </div>
+          <button class="btn btn-success btn-block" (click)="register()">Create Account</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Signed In Area -->
+    <section *ngIf="token" class="dashboard-section">
+      <div class="dashboard-header">
+        <div class="welcome-msg">
+          <h2>Project Dashboard</h2>
+          <p>Logged in as <span class="highlight">{{userName}}</span></p>
+        </div>
+        <button class="btn btn-secondary logout-btn" (click)="logout()">Logout</button>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Left Column: Project Management & List -->
+        <div class="left-column">
+          <!-- Create Project (Manager Only) -->
+          <div *ngIf="role==='MANAGER'" class="dashboard-card create-project-card">
+            <h3>Create New Project</h3>
+            <div class="form-group">
+              <label>Project Name</label>
+              <input [(ngModel)]="projectName" placeholder="e.g., Redesign Frontend" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input [(ngModel)]="projectDesc" placeholder="Brief details about this project" />
+            </div>
+            <button class="btn btn-primary" (click)="createProject()">Create Project</button>
+          </div>
+
+          <!-- Projects List -->
+          <div class="dashboard-card projects-card">
+            <h3>Active Projects</h3>
+            <div class="project-list" *ngIf="projects && projects.length > 0; else noProjects">
+              <div *ngFor="let p of projects" class="project-item" [class.active-project]="currentProject?.id === p.id"> 
+                <div class="project-info">
+                  <span class="project-title">{{p.name}}</span>
+                  <span class="project-desc">{{p.description}}</span>
+                  <div class="project-meta-metrics" *ngIf="getTotalTasksCount(p) > 0; else noProjectTasks">
+                    <div class="metrics-labels">
+                      <span class="metrics-count">📋 {{ getDoneTasksCount(p) }}/{{ getTotalTasksCount(p) }} Done</span>
+                      <span class="metrics-percent">{{ getProgressPercentage(p) }}%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                      <div class="progress-bar-fill" [style.width.%]="getProgressPercentage(p)"></div>
+                    </div>
+                  </div>
+                  <ng-template #noProjectTasks>
+                    <div class="project-meta-metrics">
+                      <span class="no-tasks-badge">No tasks</span>
+                    </div>
+                  </ng-template>
+                </div>
+                <div class="project-actions">
+                  <button class="btn btn-sm btn-outline" (click)="openProject(p)">Open</button>
+                  <button *ngIf="role==='MANAGER'" (click)="deleteProject(p)" class="btn btn-sm btn-danger">Delete</button>
+                </div>
+              </div>
+            </div>
+            <ng-template #noProjects>
+              <div class="empty-state">
+                <p>No active projects found. Managers can create one!</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Right Column: Active Project Details & Tasks -->
+        <div class="right-column">
+          <div *ngIf="currentProject" class="dashboard-card tasks-card">
+            <div class="tasks-header">
+              <div>
+                <span class="task-badge">Project active</span>
+                <h3>Tasks for {{currentProject.name}}</h3>
+              </div>
+              <!-- Real-time Project Stats -->
+              <div class="stats-overview-badges" *ngIf="activeProjectStats">
+                <span class="stat-badge todo-badge">Todo: {{activeProjectStats.todo}}</span>
+                <span class="stat-badge progress-badge">In Progress: {{activeProjectStats.inProgress}}</span>
+                <span class="stat-badge done-badge">Done: {{activeProjectStats.done}}</span>
+              </div>
+            </div>
+
+            <!-- Create Task Form -->
+            <div class="create-task-form">
+              <h4>Create Task</h4>
+              <div class="task-form-inputs">
+                <input [(ngModel)]="taskTitle" placeholder="Task title" />
+                <input [(ngModel)]="taskDesc" placeholder="Task description" />
+                
+                <!-- Assignee Dropdown Picker -->
+                <select [(ngModel)]="taskAssigneeId" class="select-assignee">
+                  <option value="">👤 Select Assignee</option>
+                  <option *ngFor="let u of users" [value]="u.id">
+                    {{u.name}} ({{u.role}})
+                  </option>
+                </select>
+
+                <button class="btn btn-primary" (click)="createTask()">Add Task</button>
+              </div>
+            </div>
+
+            <!-- Tasks List -->
+            <div class="tasks-list-container" *ngIf="tasks && tasks.length > 0; else noTasks">
+              <ul class="tasks-list">
+                <li *ngFor="let t of tasks" class="task-list-item" [class.task-done]="t.status === 'DONE'">
+                  <div class="task-content">
+                    <span class="task-title-text">{{t.title}}</span>
+                    <span class="task-desc-text">{{t.description}}</span>
+                    <div class="task-meta-info">
+                      <span class="task-status-badge" [ngClass]="t.status.toLowerCase()">{{t.status}}</span>
+                      <!-- Display Assignee -->
+                      <span class="task-assignee-badge" *ngIf="t.assignee; else unassigned">
+                        👤 {{t.assignee.name}}
+                      </span>
+                      <ng-template #unassigned>
+                        <span class="task-assignee-badge unassigned">👤 Unassigned</span>
+                      </ng-template>
+                    </div>
+                  </div>
+                  <div class="task-actions">
+                    <button class="btn btn-sm btn-success" *ngIf="t.status !== 'DONE'" (click)="updateTask(t)">Next Status</button>
+                    <button (click)="deleteTask(t)" class="btn btn-sm btn-danger">Delete</button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <ng-template #noTasks>
+              <div class="empty-state text-center">
+                <p>No tasks yet. Go ahead and create one above!</p>
+              </div>
+            </ng-template>
+
+            <!-- Project Activity Log Feed -->
+            <div class="activity-log-section" *ngIf="activeProjectActivity && activeProjectActivity.length > 0">
+              <div class="activity-log-header">
+                <h4>📜 Recent Project Activity Log</h4>
+              </div>
+              <div class="activity-log-list">
+                <div class="activity-log-item" *ngFor="let act of activeProjectActivity.slice(0, 5)">
+                  <span class="activity-message">{{act.message}}</span>
+                  <span class="activity-time">{{act.createdAt | date:'shortTime'}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!currentProject" class="dashboard-card no-project-selected">
+            <div class="empty-state">
+              <span class="large-icon">📁</span>
+              <h3>No Project Selected</h3>
+              <p>Select a project from the active projects list to view and manage its tasks.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>

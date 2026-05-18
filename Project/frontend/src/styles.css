@@ -1,2 +1,29 @@
-/* Global styles for the Angular demo app */
-body{font-family:Segoe UI,Roboto,Helvetica,Arial;margin:0;padding:12px}
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --success-color: #10b981;
+  --success-hover: #059669;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --text-dark: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-dark);
+  min-height: 100vh;
+  line-height: 1.5;
+  background-color: #f3f4f6;
+}

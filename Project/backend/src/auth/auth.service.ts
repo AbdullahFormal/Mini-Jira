@@ -62,4 +62,13 @@ export class AuthService {
     const token = await this.jwtService.signAsync(payload);
     return { access_token: token, name: user.name, role: user.role, email: user.email };
   }
+
+  /**
+   * Fetches all registered users, safely omitting their passwords.
+   */
+  async findAllUsers() {
+    return this.prisma.user.findMany({
+      select: { id: true, name: true, email: true, role: true },
+    });
+  }
 }

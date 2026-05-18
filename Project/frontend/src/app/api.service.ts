@@ -29,7 +29,7 @@ export class ApiService {
     return this.http.delete(this.base + '/projects/' + id, this.authOptions());
   }
 
-  createTask(payload: { title: string; description: string; projectId: string }): Observable<any> {
+  createTask(payload: { title: string; description: string; projectId: string; assigneeId?: string }): Observable<any> {
     return this.http.post(this.base + '/tasks', payload, this.authOptions());
   }
 
@@ -43,6 +43,18 @@ export class ApiService {
 
   deleteTask(id: string) {
     return this.http.delete(this.base + '/tasks/' + id, this.authOptions());
+  }
+
+  getUsers(): Observable<any[]> {
+    return this.http.get<any[]>(this.base + '/auth/users', this.authOptions());
+  }
+
+  getProjectStats(projectId: string): Observable<any> {
+    return this.http.get<any>(this.base + `/projects/${projectId}/stats`, this.authOptions());
+  }
+
+  getProjectActivity(projectId: string): Observable<any[]> {
+    return this.http.get<any[]>(this.base + `/projects/${projectId}/activity`, this.authOptions());
   }
 
   private authOptions() {

@@ -41,6 +41,24 @@ export class ProjectsController {
   }
 
   /**
+   * GET /projects/:id/stats
+   * Returns project task metrics summary.
+   */
+  @Get(':id/stats')
+  async getStats(@Param('id') id: string) {
+    return this.projectsService.getStats(id);
+  }
+
+  /**
+   * GET /projects/:id/activity
+   * Returns recent project activity logs.
+   */
+  @Get(':id/activity')
+  async getActivity(@Param('id') id: string) {
+    return this.projectsService.getActivity(id);
+  }
+
+  /**
    * GET /projects/:id
    * Returns a single project. Throws 404 if not found.
    */
