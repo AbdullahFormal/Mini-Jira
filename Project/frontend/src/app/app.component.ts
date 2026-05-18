@@ -94,14 +94,26 @@ export class AppComponent {
         return;
       }
 
+      if (this.registerPassword.length < 6) {
+        this.error = 'Password must be at least 6 characters.';
+        return;
+      }
+
       await firstValueFrom(this.api.register({ email: this.registerEmail, password: this.registerPassword, name: this.name, role: this.roleSelect }));
       this.error = `Registered successfully! You can now log in.`;
       
       this.registerEmail = '';
       this.registerPassword = '';
       this.name = '';
-    } catch {
-      this.error = 'Register failed. This email or name might already be taken.';
+    } catch (err: any) {
+      if (err.error?.message) {
+        const msg = Array.isArray(err.error.message)
+          ? err.error.message.join(', ')
+          : err.error.message;
+        this.error = `Register failed: ${msg}`;
+      } else {
+        this.error = 'Register failed. This email or name might already be taken.';
+      }
     }
   }
 
