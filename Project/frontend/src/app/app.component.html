@@ -43,7 +43,8 @@
               <p>Register with your own <strong>name, email, and password</strong>, choosing a role. Or use our seeded demo users:</p>
               <ul>
                 <li><strong>Manager</strong>: <code>manager@example.com</code> / <code>password</code></li>
-                <li><strong>Developer</strong>: <code>dev@example.com</code> / <code>password</code></li>
+                <li><strong>Developer 1</strong>: <code>dev1@example.com</code> / <code>password</code></li>
+                <li><strong>Developer 2</strong>: <code>dev2@example.com</code> / <code>password</code></li>
               </ul>
             </div>
             <div class="guide-column">
@@ -167,7 +168,7 @@
                 </div>
                 <div class="project-actions">
                   <button class="btn btn-sm btn-outline" (click)="openProject(p)">Open</button>
-                  <button *ngIf="role==='MANAGER'" (click)="deleteProject(p)" class="btn btn-sm btn-danger">Delete</button>
+                  <button *ngIf="p.managerId === userId" (click)="deleteProject(p)" class="btn btn-sm btn-danger">Delete</button>
                 </div>
               </div>
             </div>
@@ -233,8 +234,8 @@
                     </div>
                   </div>
                   <div class="task-actions">
-                    <button class="btn btn-sm btn-success" *ngIf="t.status !== 'DONE'" (click)="updateTask(t)">Next Status</button>
-                    <button (click)="deleteTask(t)" class="btn btn-sm btn-danger">Delete</button>
+                    <button class="btn btn-sm btn-success" *ngIf="t.status !== 'DONE' && (!t.assignee || t.assignee.id === userId || currentProject?.managerId === userId)" (click)="updateTask(t)">Next Status</button>
+                    <button *ngIf="currentProject?.managerId === userId" (click)="deleteTask(t)" class="btn btn-sm btn-danger">Delete</button>
                   </div>
                 </li>
               </ul>

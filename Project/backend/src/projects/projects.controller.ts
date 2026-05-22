@@ -10,6 +10,7 @@ import {
   Query,
   Request,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -26,6 +27,9 @@ export class ProjectsController {
    */
   @Post()
   async create(@Body() dto: CreateProjectDto, @Request() req: any) {
+    if (req.user.role !== 'MANAGER') {
+      throw new ForbiddenException('Only managers are allowed to create projects.');
+    }
     return this.projectsService.create(dto, req.user.id);
   }
 
@@ -72,7 +76,7 @@ export class ProjectsController {
    * Deletes a project and all its tasks (cascade).
    */
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.projectsService.remove(id);
+  async remove(@Param('id') id: string, @Request() req: any) {
+    return this.projectsService.remove(id, req.user.id, req.user.role);
   }
 }

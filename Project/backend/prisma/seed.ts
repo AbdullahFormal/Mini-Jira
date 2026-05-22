@@ -98,6 +98,12 @@ async function main() {
         projectId: apollo.id,
         assigneeId: alex.id,
       },
+      {
+        title: 'Task 8 (Unassigned)',
+        description: 'This is an unassigned task to test developer self-assignment.',
+        status: 'TODO',
+        projectId: apollo.id,
+      },
     ],
   });
 
@@ -124,6 +130,12 @@ async function main() {
         status: 'IN_PROGRESS',
         projectId: phoenix.id,
         assigneeId: alex.id,
+      },
+      {
+        title: 'Task 9 (Unassigned)',
+        description: 'This is another unassigned task in Project 2 to test picking it up.',
+        status: 'TODO',
+        projectId: phoenix.id,
       },
     ],
   });

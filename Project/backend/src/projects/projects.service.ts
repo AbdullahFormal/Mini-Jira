@@ -1,6 +1,6 @@
 // src/projects/projects.service.ts - Project service
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { logActivity, activityLogs } from '../activity-log';
@@ -56,8 +56,11 @@ export class ProjectsService {
   }
 
   // Delete project
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string, userId: string, userRole: string) {
+    const project = await this.findOne(id);
+    if (project.managerId !== userId) {
+      throw new ForbiddenException('Only the project manager is allowed to delete this project.');
+    }
     return this.prisma.project.delete({ where: { id } });
   }
 }

@@ -10,6 +10,7 @@ import {
   Body,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -26,8 +27,8 @@ export class TasksController {
    * Creates a new task. Body must include projectId.
    */
   @Post()
-  async create(@Body() dto: CreateTaskDto) {
-    return this.tasksService.create(dto);
+  async create(@Body() dto: CreateTaskDto, @Request() req: any) {
+    return this.tasksService.create(dto, req.user.id, req.user.role);
   }
 
   /**
@@ -54,8 +55,8 @@ export class TasksController {
    * Only send the fields you want to change.
    */
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() dto: UpdateTaskDto) {
-    return this.tasksService.update(id, dto);
+  async update(@Param('id') id: string, @Body() dto: UpdateTaskDto, @Request() req: any) {
+    return this.tasksService.update(id, dto, req.user.id, req.user.role);
   }
 
   /**
@@ -63,7 +64,7 @@ export class TasksController {
    * Deletes a task by id.
    */
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.tasksService.remove(id);
+  async remove(@Param('id') id: string, @Request() req: any) {
+    return this.tasksService.remove(id, req.user.id, req.user.role);
   }
 }

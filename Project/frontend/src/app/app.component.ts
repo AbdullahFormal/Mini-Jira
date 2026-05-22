@@ -12,6 +12,7 @@ export class AppComponent {
   token = localStorage.getItem('mj_token') || '';
   role: string | null = null;
   userName: string | null = null;
+  userId: string | null = null;
   projects: any[] = [];
   currentProject: any = null;
   tasks: any[] = [];
@@ -57,6 +58,7 @@ export class AppComponent {
       localStorage.setItem('mj_token', t);
       this.role = this.decodeRole(t);
       this.userName = this.decodeName(t);
+      this.userId = this.decodeUserId(t);
       void this.loadProjects();
       void this.loadUsers();
       return;
@@ -65,6 +67,7 @@ export class AppComponent {
     localStorage.removeItem('mj_token');
     this.role = null;
     this.userName = null;
+    this.userId = null;
     this.projects = [];
     this.currentProject = null;
     this.tasks = [];
@@ -285,6 +288,15 @@ export class AppComponent {
         return payload.email;
       }
       return null;
+    } catch {
+      return null;
+    }
+  }
+
+  private decodeUserId(token: string) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub || null;
     } catch {
       return null;
     }
