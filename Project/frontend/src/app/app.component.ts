@@ -79,7 +79,7 @@ export class AppComponent {
   async login() {
     this.clearError();
     try {
-      const res = await firstValueFrom(this.api.login({ email: this.email, password: this.password }));
+      const res = await firstValueFrom(this.api.login({ email: this.email.trim(), password: this.password }));
       this.applyToken(res.access_token || res.accessToken);
       if (res.name) {
         this.userName = res.name;
@@ -102,7 +102,7 @@ export class AppComponent {
         return;
       }
 
-      await firstValueFrom(this.api.register({ email: this.registerEmail, password: this.registerPassword, name: this.name, role: this.roleSelect }));
+      await firstValueFrom(this.api.register({ email: this.registerEmail.trim(), password: this.registerPassword, name: this.name, role: this.roleSelect }));
       this.error = `Registered successfully! You can now log in.`;
       
       this.registerEmail = '';
